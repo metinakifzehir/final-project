@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     app_port: int = 8000
     app_debug: bool = True
     
-    gemini_api_key: str = "***REMOVED***"
+    gemini_api_key: str = ""
     redis_url: str = "redis://localhost:6379"
 
 settings = Settings()
