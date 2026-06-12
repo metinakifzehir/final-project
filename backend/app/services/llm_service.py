@@ -57,7 +57,7 @@ async def generate_explanation(user_profile: dict, restaurant: dict, distance_km
         return mock_response
 
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-3.1-flash-lite')
         # Gemini'nin JSON modunu kullanmak için generation_config ayarı
         generation_config = genai.types.GenerationConfig(response_mime_type="application/json")
         
