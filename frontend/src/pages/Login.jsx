@@ -5,7 +5,7 @@ import { loginUser } from "../api/authApi";
 function Login() {
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
@@ -18,7 +18,7 @@ function Login() {
 
         try {
             const result = await loginUser({
-            email,
+            username,
             password,
             });
 
@@ -32,7 +32,7 @@ function Login() {
         } catch (err) {
         setError(
             err.response?.data ||
-            "Login failed. Please check your email and password."
+            "Login failed. Please check your username and password."
         );
         }
     };
@@ -59,7 +59,7 @@ function Login() {
             <p style={styles.formText}>Login to continue your restaurant journey.</p>
 
             <form onSubmit={handleLogin}>
-                <input type="email" placeholder="Email address" style={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input type="username" placeholder="Username" style={styles.input} value={username} onChange={(e) => setUsername(e.target.value)} />
                 <input type="password" placeholder="Password" style={styles.input} value={password} onChange={(e) => setPassword(e.target.value)} />
 
                 {message && <p style={styles.success}>{message}</p>}

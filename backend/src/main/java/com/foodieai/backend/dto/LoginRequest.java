@@ -7,9 +7,8 @@ import lombok.Data;
 @Data
 public class LoginRequest {
 
-    @Email
     @NotBlank
-    private String email;
+    private String username;
 
     @NotBlank
     private String password;

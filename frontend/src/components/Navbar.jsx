@@ -1,110 +1,53 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { UtensilsCrossed } from "lucide-react";
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const isActive = (path) => location.pathname === path;
+
+  const userName = localStorage.getItem("userName") || "";
+
+  const handleLogout = () => {
+    localStorage.removeItem("userName");
+    navigate("/login");
+  };
 
   return (
-    <nav style={styles.navbar} className="navbar">
-      <Link to="/recommendations" style={styles.logo}>
-        🍽️ FoodieAI
+    <nav className="navbar">
+      <Link to="/recommendations" className="nav-logo">
+        <UtensilsCrossed size={34} color="#ff6334" />
+        <span>FoodieAI</span>
       </Link>
 
-      <div style={styles.links} className="navbar-links">
+      <div className="nav-links">
         <Link
           to="/recommendations"
-          style={{
-            ...styles.link,
-            ...(isActive("/recommendations") ? styles.activeLink : {}),
-          }}
+          className={`nav-link ${
+            location.pathname === "/recommendations" ? "active" : ""
+          }`}
         >
           Recommendations
         </Link>
 
         <Link
           to="/search"
-          style={{
-            ...styles.link,
-            ...(isActive("/search") ? styles.activeLink : {}),
-          }}
+          className={`nav-link ${
+            location.pathname === "/search" ? "active" : ""
+          }`}
         >
           Search
         </Link>
       </div>
 
-      <div style={styles.userArea} className="navbar-user">
-        <span style={styles.user}>{localStorage.getItem("userName") || ""}</span>
+      <div className="nav-user">
+        <span>{userName}</span>
 
-        <button
-            style={styles.logout}
-            onClick={() => {
-                localStorage.removeItem("userName");
-                navigate("/login");
-            }}
-        >
-            Logout
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
         </button>
       </div>
     </nav>
   );
 }
-
-const styles = {
-  navbar: {
-    height: "76px",
-    padding: "0 70px",
-    background: "rgba(255,255,255,0.92)",
-    backdropFilter: "blur(10px)",
-    display: "grid",
-    gridTemplateColumns: "1fr auto 1fr",
-    alignItems: "center",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-    position: "sticky",
-    top: 0,
-    zIndex: 10,
-  },
-  logo: {
-    fontSize: "24px",
-    fontWeight: "800",
-    color: "#222",
-    textDecoration: "none",
-  },
-  links: {
-    display: "flex",
-    gap: "32px",
-    alignItems: "center",
-  },
-  link: {
-    color: "#555",
-    textDecoration: "none",
-    fontWeight: "600",
-    padding: "10px 0",
-    borderBottom: "3px solid transparent",
-  },
-  activeLink: {
-    color: "#FF6B35",
-    borderBottom: "3px solid #FF6B35",
-  },
-  userArea: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "18px",
-    alignItems: "center",
-  },
-  user: {
-    color: "#444",
-    fontWeight: "600",
-  },
-  logout: {
-  background: "#FF6B35",
-  color: "white",
-  padding: "10px 18px",
-  borderRadius: "12px",
-  fontWeight: "700",
-  border: "none",
-  cursor: "pointer",
-  },
-};
 
 export default Navbar;

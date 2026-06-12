@@ -15,21 +15,21 @@ public class AuthService {
 
     public void register(RegisterRequest request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists.");
+        if (userRepository.existsByUsername(request.getUsername())) {
+        throw new RuntimeException("Username already exists.");
         }
 
         User user = User.builder()
                 .fullName(request.getFullName())
-                .email(request.getEmail())
-                .password(request.getPassword()) // BCrypt'a birazdan geçeceğiz
+                .username(request.getUsername())
+                .password(request.getPassword())
                 .build();
 
         userRepository.save(user);
     }
 
     public String login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found."));
 
         if (!user.getPassword().equals(request.getPassword())) {

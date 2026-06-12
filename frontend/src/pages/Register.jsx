@@ -7,7 +7,7 @@ function Register() {
     const navigate = useNavigate();
 
     const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [message, setMessage] = useState("");
@@ -27,7 +27,7 @@ function Register() {
     try {
         const result = await registerUser({
         fullName,
-        email,
+        username,
         password,
         });
 
@@ -76,11 +76,11 @@ function Register() {
             onChange={(e) => setFullName(e.target.value)}
             />
             <input
-            type="email"
-            placeholder="Email address"
+            type="text"
+            placeholder="Username"
             style={styles.input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             />
             <input
             type="password"

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import ExplanationPanel from "../components/ExplanationPanel";
 import Navbar from "../components/Navbar";
+import ExplanationPanel from "../components/ExplanationPanel";
 import RestaurantCard from "../components/RestaurantCard";
 
 const mockRestaurants = [
@@ -11,7 +11,8 @@ const mockRestaurants = [
     rating: 4.6,
     distance: 0.8,
     isOpen: true,
-    summary: "Et kalitesi, hızlı servisi ve merkezi konumuyla öne çıkan popüler bir kebap restoranı.",
+    summary:
+      "Known for meat quality, fast service and central location.",
   },
   {
     id: 2,
@@ -20,61 +21,68 @@ const mockRestaurants = [
     rating: 4.4,
     distance: 1.2,
     isOpen: true,
-    summary: "Kahvaltı, tatlı ve kahve seçenekleriyle arkadaş buluşmaları için uygun bir mekan.",
+    summary:
+      "A cozy bistro with breakfast, desserts and coffee options.",
   },
   {
     id: 3,
-    name: "Ev Yemekleri Durağı",
-    category: "Ev Yemeği",
-    rating: 4.7,
-    distance: 0.5,
-    isOpen: false,
-    summary: "Uygun fiyatlı, temiz ve günlük ev yemekleriyle özellikle öğle yemekleri için tercih ediliyor.",
+    name: "Burger Point Ankara",
+    category: "Burger",
+    rating: 4.3,
+    distance: 1.7,
+    isOpen: true,
+    summary:
+      "A modern burger place with rich menu options and quick service.",
   },
 ];
 
 function Recommendations() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+
   return (
-    <>
+    <div className="main-bg">
       <Navbar />
 
-      <main style={styles.page} className="page-container">
-        <section style={styles.hero} className="hero-section">
-          <p style={styles.badge}>AI-Powered Restaurant Recommendations</p>
-          <h1 style={styles.title} className="hero-title">Find the best restaurants around you</h1>
-          <p style={styles.subtitle}>
+      <main className="recommendations-page">
+        <section className="hero-modern">
+          <div className="hero-badge">
+            ✨ AI-Powered Restaurant Recommendations
+          </div>
+
+          <h1>Find the best restaurants around you</h1>
+
+          <p>
             Get personalized restaurant suggestions based on your location,
             preferences and real user reviews.
           </p>
         </section>
 
-        <section style={styles.content} className="content-grid">
-          <aside style={styles.filters}>
+        <section className="content-modern">
+          <aside className="filter-modern">
             <h3>Filters</h3>
 
-            <label style={styles.label}>Radius</label>
-            <select style={styles.input}>
-              <option>All</option>
-                <option>1 km</option>
-                <option>3 km</option>
-                <option>5 km</option>
-                <option>10 km</option>
-                <option>15 km</option>
-                <option>20 km</option>
-            </select>
-
-            <label style={styles.label}>Category</label>
-            <select style={styles.input}>
-              <option>All</option>
+            <label>Cuisine</label>
+            <select>
+              <option>All Cuisines</option>
               <option>Kebap</option>
               <option>Burger</option>
               <option>Cafe</option>
-              <option>Ev Yemeği</option>
+              <option>Home Cooking</option>
             </select>
 
-            <label style={styles.label}>Minimum Rating</label>
-            <select style={styles.input}>
+            <label>Radius</label>
+            <select>
+              <option>All</option>
+              <option>1 km</option>
+              <option>3 km</option>
+              <option>5 km</option>
+              <option>10 km</option>
+              <option>15 km</option>
+              <option>20 km</option>
+            </select>
+
+            <label>Rating</label>
+            <select>
               <option>2.0+</option>
               <option>2.5+</option>
               <option>3.0+</option>
@@ -83,118 +91,48 @@ function Recommendations() {
               <option>4.5+</option>
             </select>
 
-            <label style={styles.label}>Top-K Results</label>
-            <select style={styles.input}>
-            <option>5</option>
-            <option>10</option>
-            <option>15</option>
-            <option>20</option>
+            <label>Minimum Reviews</label>
+            <select>
+              <option>10+</option>
+              <option>25+</option>
+              <option>50+</option>
+              <option>100+</option>
             </select>
 
-            <label style={styles.label}>Minimum Review Count</label>
-            <select style={styles.input}>
-            <option>10+</option>
-            <option>25+</option>
-            <option>50+</option>
-            <option>100+</option>
+            <label>Top-K Results</label>
+            <select>
+              <option>5</option>
+              <option>10</option>
+              <option>15</option>
+              <option>20</option>
             </select>
 
-            <button style={styles.filterBtn}>Get Recommendations</button>
+            <button>Get Recommendations</button>
           </aside>
 
-          <section style={styles.list}>
-            <h2 style={styles.sectionTitle}>Top Recommendations</h2>
+          <section className="results-modern">
+            <h2>Top Recommendations</h2>
+            <p className="results-subtitle">AI-powered picks just for you</p>
 
-            {mockRestaurants.map((restaurant) => (
+            <div className="cards-grid">
+              {mockRestaurants.map((restaurant) => (
                 <RestaurantCard
-                key={restaurant.id}
-                restaurant={restaurant}
-                onExplain={setSelectedRestaurant}
+                  key={restaurant.id}
+                  restaurant={restaurant}
+                  onExplain={setSelectedRestaurant}
                 />
-            ))}
-            </section>
+              ))}
+            </div>
+          </section>
         </section>
-      </main>
-      <ExplanationPanel
-        restaurant={selectedRestaurant}
-        onClose={() => setSelectedRestaurant(null)}
+
+        <ExplanationPanel
+          restaurant={selectedRestaurant}
+          onClose={() => setSelectedRestaurant(null)}
         />
-    </>
+      </main>
+    </div>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#FAF7F2",
-    padding: "50px 70px",
-  },
-  hero: {
-    background: "linear-gradient(135deg, #FF6B35 0%, #FF9F1C 100%)",
-    color: "white",
-    padding: "50px",
-    borderRadius: "28px",
-    marginBottom: "36px",
-  },
-  badge: {
-    background: "rgba(255,255,255,0.22)",
-    display: "inline-block",
-    padding: "8px 14px",
-    borderRadius: "999px",
-    marginBottom: "18px",
-  },
-  title: {
-    fontSize: "44px",
-    margin: "0 0 14px",
-  },
-  subtitle: {
-    fontSize: "18px",
-    maxWidth: "680px",
-    lineHeight: "1.6",
-  },
-  content: {
-    display: "grid",
-    gridTemplateColumns: "280px 1fr",
-    gap: "30px",
-  },
-  filters: {
-    background: "white",
-    borderRadius: "22px",
-    padding: "24px",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.07)",
-    height: "fit-content",
-  },
-  label: {
-    display: "block",
-    marginTop: "18px",
-    marginBottom: "8px",
-    fontWeight: "600",
-    color: "#444",
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "12px",
-    border: "1px solid #ddd",
-  },
-  filterBtn: {
-    width: "100%",
-    marginTop: "24px",
-    padding: "13px",
-    background: "#FF6B35",
-    color: "white",
-    border: "none",
-    borderRadius: "14px",
-    cursor: "pointer",
-  },
-  list: {
-    display: "grid",
-    gap: "20px",
-  },
-  sectionTitle: {
-    marginTop: 0,
-    color: "#222",
-  },
-};
 
 export default Recommendations;
