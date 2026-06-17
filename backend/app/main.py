@@ -1,13 +1,4 @@
 from contextlib import asynccontextmanager
-
-from fastapi import FastAPI
-
-from app.config import settings
-from app.database import close_mongodb_connection, connect_to_mongodb, get_database
-from app.api.endpoints import recommendations, explanations
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import close_mongodb_connection, connect_to_mongodb
@@ -20,36 +11,6 @@ async def lifespan(app: FastAPI):
     yield
     await close_mongodb_connection()
 
-
-app = FastAPI(
-    title="LLM Tabanli Restoran Oneri Sistemi",
-    description="Ankara il merkezi odakli hibrit oneri API",
-    version="0.1.0",
-    lifespan=lifespan,
-)
-
-app.include_router(recommendations.router, prefix="/api/v1/recommendations", tags=["Recommendations"])
-app.include_router(explanations.router, prefix="/api/v1/explanations", tags=["Explanations"])
-
-@app.get("/health")
-async def health_check():
-    db = get_database()
-    await db.command("ping")
-    collections = await db.list_collection_names()
-
-    return {
-        "status": "ok",
-        "database": settings.mongodb_db_name,
-        "collections": len(collections),
-    }
-
-
-@app.get("/")
-async def root():
-    return {
-        "message": "Restoran Oneri Sistemi API",
-        "docs": "/docs",
-        "health": "/health",
 # FastAPI uygulamasını oluştur
 app = FastAPI(
     title="FoodieAI - Restoran Öneri Sistemi",
@@ -59,19 +20,17 @@ app = FastAPI(
 )
 
 # CORS (Cross-Origin Resource Sharing) Ayarları
-# Frontend'in (React) backend'e (FastAPI) erişebilmesi için gereklidir.
 origins = [
     "http://localhost:5173",  # React geliştirme sunucusunun varsayılan adresi
     "http://localhost:3000",  # Alternatif React geliştirme adresi
-    # "https://your-production-frontend-url.com", # Eğer canlıya çıkarsanız buraya ekleyin
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Tüm metodlara (GET, POST, vb.) izin ver
-    allow_headers=["*"],  # Tüm başlıklara izin ver
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # API Rotalarını (Router) dahil et
