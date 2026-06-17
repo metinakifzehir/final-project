@@ -9,3 +9,21 @@ pandas>=2.2.0
 scikit-learn>=1.4.0
 scikit-surprise>=1.1.3
 sentence-transformers>=2.5.0
+# FastAPI ve Sunucu
+fastapi
+uvicorn[standard]
+
+# Veritabanı
+motor
+
+# Ayarlar ve .env yönetimi
+pydantic-settings
+python-dotenv
+
+# Kimlik Doğrulama ve Güvenlik (Authentication & Security)
+passlib[bcrypt]
+python-jose[cryptography]
+
+# LLM ve Cache
+google-generativeai
+redis
