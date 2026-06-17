@@ -1,0 +1,18 @@
+# FastAPI ve Sunucu
+fastapi
+uvicorn[standard]
+
+# Veritabanı
+motor
+
+# Ayarlar ve .env yönetimi
+pydantic-settings
+python-dotenv
+
+# Kimlik Doğrulama ve Güvenlik (Authentication & Security)
+passlib[bcrypt]
+python-jose[cryptography]
+
+# LLM ve Cache
+google-generativeai
+redis
