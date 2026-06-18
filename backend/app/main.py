@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,10 +21,24 @@ app = FastAPI(
 )
 
 # CORS (Cross-Origin Resource Sharing) Ayarları
+# FRONTEND_URL can be set as a Railway reference variable (e.g. ${{frontend.RAILWAY_PUBLIC_DOMAIN}})
+# to dynamically resolve the frontend's public domain without hardcoding.
+_frontend_url = os.getenv("FRONTEND_URL")
+
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://final-project-production-87cf.up.railway.app",
+    "http://final-project-production-87cf.up.railway.app",
 ]
+
+if _frontend_url:
+    # Normalise: ensure both https and http variants are included
+    _frontend_url = _frontend_url.rstrip("/")
+    for _scheme in ("https://", "http://"):
+        _origin = _frontend_url if _frontend_url.startswith(_scheme) else _scheme + _frontend_url.split("://")[-1]
+        if _origin not in origins:
+            origins.append(_origin)
 
 app.add_middleware(
     CORSMiddleware,
