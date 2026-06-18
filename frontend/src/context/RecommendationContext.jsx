@@ -62,12 +62,24 @@ export const RecommendationProvider = ({ children }) => {
     }
   };
 
+  const clearRecommendations = () => {
+    setRestaurants([]);
+    setHasFetched(false);
+    setError(null);
+    setSelectedCuisines([]);
+    setRadius(5.0);
+    setMinRating(4.0);
+    setMinReviews(10);
+    setTopK(10);
+  };
+
   const value = {
     restaurants,
     isLoading,
     error,
     hasFetched,
     handleGetRecommendations,
+    clearRecommendations,
     // Filtreler ve setter'ları da context'e ekle
     selectedCuisines, setSelectedCuisines,
     radius, setRadius,

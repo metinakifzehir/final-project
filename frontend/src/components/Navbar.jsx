@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { UtensilsCrossed } from "lucide-react";
+import { useRecommendations } from "../context/RecommendationContext";
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { clearRecommendations } = useRecommendations();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -24,6 +26,7 @@ function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
+    clearRecommendations();
     navigate("/login");
   };
 

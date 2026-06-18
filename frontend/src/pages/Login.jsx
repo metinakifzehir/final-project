@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../api/api";
+import { useRecommendations } from "../context/RecommendationContext";
 
 function Login() {
     const navigate = useNavigate();
+    const { clearRecommendations } = useRecommendations();
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -21,6 +23,7 @@ function Login() {
                 password,
             });
             localStorage.setItem("token", response.data.access_token);
+            clearRecommendations();
             setMessage("Login successful. Redirecting...");
             setTimeout(() => {
                 navigate("/recommendations");

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import apiClient from "../api/api"; // Merkezi apiClient'ı kullan
+import { useRecommendations } from "../context/RecommendationContext";
 
 function Register() {
     const navigate = useNavigate();
+    const { clearRecommendations } = useRecommendations();
 
     // State'i backend şemasıyla uyumlu hale getir (author_name)
     const [authorName, setAuthorName] = useState("");
@@ -38,6 +40,7 @@ function Register() {
 
             // Başarılı kayıt sonrası login sayfasına yönlendir
             setTimeout(() => {
+                clearRecommendations();
                 navigate("/login");
             }, 1500);
 
