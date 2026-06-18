@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f051228-cc73-4d16-8cd0-e72fd154f311" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/railway.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/api/endpoints/restaurants.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/api/endpoints/restaurants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/restaurant.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/restaurant.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Recommendations.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Recommendations.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/RestaurantDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/RestaurantDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Search.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Search.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

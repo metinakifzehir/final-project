@@ -18,7 +18,6 @@ function Search() {
   const [error, setError] = useState(null);
   const [location, setLocation] = useState(null);
 
-  // Başlangıçta tüm mutfak türlerini seçili hale getir
   const [selectedCuisines, setSelectedCuisines] = useState([...CUISINES]);
   const [radius, setRadius] = useState(10.0);
   const [minRating, setMinRating] = useState(1.0);
@@ -155,7 +154,7 @@ function Search() {
           </aside>
 
           <section className="results-modern">
-            <h2>Search Results</h2>
+            <h2 style={{ color: '#222' }}>Search Results</h2>
             {query && <p className="results-subtitle">Showing results for "{query}"</p>}
 
             {isLoading && <p>Searching...</p>}

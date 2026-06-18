@@ -2,7 +2,7 @@ import { useState } from "react";
 import Navbar from "../components/Navbar";
 import ExplanationPanel from "../components/ExplanationPanel";
 import RestaurantCard from "../components/RestaurantCard";
-import { useRecommendations } from "../context/RecommendationContext"; // Context'i kullanmak için hook'u import et
+import { useRecommendations } from "../context/RecommendationContext";
 
 const CUISINES = [
   "Döner", "Tatlı", "Pide & Lahmacun", "Sokak Lezzetleri", "Kebap",
@@ -15,7 +15,6 @@ const CUISINES = [
 function Recommendations() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
 
-  // Tüm state ve fonksiyonları context'ten alıyoruz
   const {
     restaurants,
     isLoading,
@@ -101,7 +100,7 @@ function Recommendations() {
           </aside>
 
           <section className="results-modern">
-            <h2>Top Recommendations</h2>
+            <h2 style={{ color: '#222' }}>Top Recommendations</h2>
             <p className="results-subtitle">AI-powered picks just for you</p>
 
             {isLoading && <p>Getting your location and recommendations...</p>}
@@ -119,7 +118,6 @@ function Recommendations() {
               </div>
             )}
 
-            {/* hasFetched'i kullanarak ilk yüklemede mesajı göster */}
             {!isLoading && !error && restaurants.length === 0 && !hasFetched && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', width: '100%' }}>
                 <p>Click "Get Recommendations" to allow location access and see your results.</p>
