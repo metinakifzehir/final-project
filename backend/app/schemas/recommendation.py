@@ -15,6 +15,7 @@ class RestaurantResponse(BaseModel):
     name: str
     category: str
     rating: float
+    rating_count: Optional[int] = None # Yeni alan
     distance_km: float
     is_open: Optional[bool] = None
     

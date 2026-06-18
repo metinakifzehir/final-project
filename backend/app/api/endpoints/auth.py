@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import timedelta
 
-from app.schemas.auth import RegisterRequest, LoginRequest, Token
+from app.schemas.auth import RegisterRequest, LoginRequest, Token, UpdatePasswordRequest
 from app.services import auth_service
 from app.services.jwt_service import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
@@ -11,7 +11,7 @@ router = APIRouter()
 async def register(request: RegisterRequest):
     """
     Yeni kullanıcı kaydı oluşturur.
-    - **full_name**: Kullanıcının tam adı.
+    - **author_name**: Yazarın tam adı.
     - **username**: Benzersiz kullanıcı adı.
     - **password**: En az 6 karakterli şifre.
     """
@@ -43,3 +43,17 @@ async def login_for_access_token(request: LoginRequest):
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.put("/update-password", status_code=status.HTTP_200_OK)
+async def update_password(request: UpdatePasswordRequest):
+    """
+    Mevcut bir kullanıcının şifresini günceller.
+    """
+    try:
+        await auth_service.update_password(request.username, request.password)
+        return {"message": "Şifre başarıyla güncellendi."}
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )

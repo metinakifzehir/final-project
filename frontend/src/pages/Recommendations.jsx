@@ -1,56 +1,103 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import ExplanationPanel from "../components/ExplanationPanel";
 import RestaurantCard from "../components/RestaurantCard";
+import apiClient from "../api/api";
 
-const mockRestaurants = [
-  {
-    id: 1,
-    name: "Ankara Kebapçısı",
-    category: "Kebap",
-    rating: 4.6,
-    distance: 0.8,
-    isOpen: true,
-    summary:
-      "Known for meat quality, fast service and central location.",
-  },
-  {
-    id: 2,
-    name: "Bistro Bahçelievler",
-    category: "Cafe & Bistro",
-    rating: 4.4,
-    distance: 1.2,
-    isOpen: true,
-    summary:
-      "A cozy bistro with breakfast, desserts and coffee options.",
-  },
-  {
-    id: 3,
-    name: "Burger Point Ankara",
-    category: "Burger",
-    rating: 4.3,
-    distance: 1.7,
-    isOpen: true,
-    summary:
-      "A modern burger place with rich menu options and quick service.",
-  },
+const CUISINES = [
+  "All Cuisines",
+  "Döner", "Tatlı", "Pide & Lahmacun", "Sokak Lezzetleri", "Kebap",
+  "Çiğ Köfte", "Burger", "Tavuk", "Fırın & Pastane", "Tost/Sandviç",
+  "Pizza", "Kahve & İçecek", "Ev Yemekleri", "Köfte", "Cafe",
+  "Dünya Mutfağı", "Meze", "Kahvaltı", "Börek", "Çorba", "Makarna",
+  "Mantı", "Balık & Deniz Ürünleri", "Salata & Sağlık", "Dondurma",
+  "Uzak Doğu", "Steak", "Tantuni"
 ];
 
 function Recommendations() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [restaurants, setRestaurants] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Filtre State'leri
+  const [cuisine, setCuisine] = useState("All Cuisines");
+  const [radius, setRadius] = useState(5.0);
+  const [minRating, setMinRating] = useState(4.0);
+  const [minReviews, setMinReviews] = useState(10);
+  const [topK, setTopK] = useState(10);
+
+  const getLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation is not supported by your browser."));
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            });
+          },
+          () => {
+            reject(new Error("Unable to retrieve your location. Please grant permission."));
+          }
+        );
+      }
+    });
+  };
+
+  const handleGetRecommendations = async () => {
+    setIsLoading(true);
+    setError(null);
+    setRestaurants([]);
+
+    try {
+      const location = await getLocation();
+
+      const payload = {
+        user_id: "100677076065329495898",
+        latitude: location.latitude,
+        longitude: location.longitude,
+        radius_km: parseFloat(radius),
+        min_rating: parseFloat(minRating),
+        top_k: parseInt(topK, 10),
+        // Sadece "All Cuisines" seçilmemişse kategoriyi gönder
+        categories: cuisine !== "All Cuisines" ? [cuisine] : undefined,
+      };
+
+      const response = await apiClient.post("/recommendations/", payload);
+      setRestaurants(response.data.recommendations);
+    } catch (err) {
+      let errorMessage = err.message || "An unexpected error occurred.";
+      if (err.response) {
+        if (err.response.status === 401) {
+          errorMessage = "Please log in to get recommendations.";
+        } else if (err.response.status === 422) {
+          errorMessage = "Invalid or missing data sent to the server.";
+          console.error("Validation Error:", err.response.data);
+        }
+      }
+      setError(errorMessage);
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Sayfa ilk yüklendiğinde otomatik istek göndermiyoruz.
+  }, []);
 
   return (
     <div className="main-bg">
       <Navbar />
-
       <main className="recommendations-page">
         <section className="hero-modern">
           <div className="hero-badge">
             ✨ AI-Powered Restaurant Recommendations
           </div>
-
           <h1>Find the best restaurants around you</h1>
-
           <p>
             Get personalized restaurant suggestions based on your location,
             preferences and real user reviews.
@@ -61,71 +108,82 @@ function Recommendations() {
           <aside className="filter-modern">
             <h3>Filters</h3>
 
-            <label>Cuisine</label>
-            <select>
-              <option>All Cuisines</option>
-              <option>Kebap</option>
-              <option>Burger</option>
-              <option>Cafe</option>
-              <option>Home Cooking</option>
-            </select>
+            <div className="filter-group">
+              <label>Cuisine</label>
+              <select value={cuisine} onChange={(e) => setCuisine(e.target.value)}>
+                {CUISINES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
 
-            <label>Radius</label>
-            <select>
-              <option>All</option>
-              <option>1 km</option>
-              <option>3 km</option>
-              <option>5 km</option>
-              <option>10 km</option>
-              <option>15 km</option>
-              <option>20 km</option>
-            </select>
+            <div className="filter-group">
+              <label>Radius: {radius} km</label>
+              <input
+                type="range"
+                min="0.5" max="20" step="0.5"
+                value={radius}
+                onChange={(e) => setRadius(e.target.value)}
+              />
+            </div>
 
-            <label>Rating</label>
-            <select>
-              <option>2.0+</option>
-              <option>2.5+</option>
-              <option>3.0+</option>
-              <option>3.5+</option>
-              <option>4.0+</option>
-              <option>4.5+</option>
-            </select>
+            <div className="filter-group">
+              <label>Minimum Rating: {minRating}</label>
+              <input
+                type="range"
+                min="1.0" max="5.0" step="0.1"
+                value={minRating}
+                onChange={(e) => setMinRating(e.target.value)}
+              />
+            </div>
 
-            <label>Minimum Reviews</label>
-            <select>
-              <option>10+</option>
-              <option>25+</option>
-              <option>50+</option>
-              <option>100+</option>
-            </select>
+            <div className="filter-group">
+              <label>Minimum Reviews: {minReviews}</label>
+              <input
+                type="range"
+                min="0" max="500" step="10"
+                value={minReviews}
+                onChange={(e) => setMinReviews(e.target.value)}
+              />
+            </div>
 
-            <label>Top-K Results</label>
-            <select>
-              <option>5</option>
-              <option>10</option>
-              <option>15</option>
-              <option>20</option>
-            </select>
+            <div className="filter-group">
+              <label>Top-K Results: {topK}</label>
+              <input
+                type="range"
+                min="3" max="20" step="1"
+                value={topK}
+                onChange={(e) => setTopK(e.target.value)}
+              />
+            </div>
 
-            <button>Get Recommendations</button>
+            <button onClick={handleGetRecommendations} disabled={isLoading} style={{marginTop: '15px'}}>
+              {isLoading ? "Getting Location..." : "Get Recommendations"}
+            </button>
           </aside>
 
           <section className="results-modern">
             <h2>Top Recommendations</h2>
             <p className="results-subtitle">AI-powered picks just for you</p>
 
+            {isLoading && <p>Getting your location and recommendations...</p>}
+            {error && <p className="error-message">{error}</p>}
+
             <div className="cards-grid">
-              {mockRestaurants.map((restaurant) => (
-                <RestaurantCard
-                  key={restaurant.id}
-                  restaurant={restaurant}
-                  onExplain={setSelectedRestaurant}
-                />
-              ))}
+              {!isLoading && !error && restaurants.length > 0 ? (
+                restaurants.map((restaurant) => (
+                  <RestaurantCard
+                    key={restaurant.id || restaurant.name}
+                    restaurant={restaurant}
+                    onExplain={setSelectedRestaurant}
+                  />
+                ))
+              ) : (
+                !isLoading && !error && <p>Click "Get Recommendations" to allow location access and see your results.</p>
+              )}
             </div>
           </section>
         </section>
-
         <ExplanationPanel
           restaurant={selectedRestaurant}
           onClose={() => setSelectedRestaurant(null)}

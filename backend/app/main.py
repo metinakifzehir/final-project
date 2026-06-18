@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import close_mongodb_connection, connect_to_mongodb
-from app.api.endpoints import recommendations, explanations, auth
+from app.api.endpoints import recommendations, explanations, auth, restaurants
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,8 +21,8 @@ app = FastAPI(
 
 # CORS (Cross-Origin Resource Sharing) Ayarları
 origins = [
-    "http://localhost:5173",  # React geliştirme sunucusunun varsayılan adresi
-    "http://localhost:3000",  # Alternatif React geliştirme adresi
+    "http://localhost:5173",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -37,6 +37,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(recommendations.router, prefix="/api/v1/recommendations", tags=["Recommendations"])
 app.include_router(explanations.router, prefix="/api/v1/explanations", tags=["Explanations"])
+app.include_router(restaurants.router, prefix="/api/v1/restaurants", tags=["Restaurants"]) # Yeni arama router'ı
 
 @app.get("/", tags=["Root"])
 async def root():

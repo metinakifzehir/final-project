@@ -1,48 +1,81 @@
+import { useState, useEffect } from "react";
+import apiClient from "../api/api";
+
 function ExplanationPanel({ restaurant, onClose }) {
+  // State'i artık bir nesne olarak başlatıyoruz
+  const [explanation, setExplanation] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (restaurant) {
+      const fetchExplanation = async () => {
+        setIsLoading(true);
+        setError(null);
+        setExplanation(null); // Önceki açıklamayı temizle
+
+        try {
+          const payload = {
+            restaurant_id: restaurant.id,
+            distance_km: restaurant.distance_km,
+          };
+          const response = await apiClient.post("/explanations/", payload);
+          // Gelen JSON nesnesini doğrudan state'e ata
+          setExplanation(response.data);
+        } catch (err) {
+          setError("Açıklama alınırken bir hata oluştu.");
+          console.error(err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchExplanation();
+    }
+  }, [restaurant]);
+
   if (!restaurant) return null;
 
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
-        <button style={styles.closeBtn} onClick={onClose}>
-          ×
-        </button>
-
+        <button style={styles.closeBtn} onClick={onClose}>×</button>
         <p style={styles.badge}>Explanation</p>
-
         <h2 style={styles.title}>Why {restaurant.name}?</h2>
 
-        <div style={styles.section}>
-          <h4>✅ Why this is recommended</h4>
-          <p>
-            This restaurant matches your selected preferences and is located
-            close to your current area. It also has a strong rating and positive
-            review patterns.
-          </p>
-        </div>
+        {isLoading && <p>Generating explanation...</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
 
-        <div style={styles.section}>
-          <h4>⭐ Highlights</h4>
-          <p>{restaurant.summary}</p>
-        </div>
+        {/* Açıklama verisi yüklendiğinde gösterilecek yeni yapı */}
+        {explanation && !isLoading && (
+          <>
+            <div style={styles.section}>
+              <h4>✅ Why this is recommended</h4>
+              <p>{explanation.reason}</p>
+            </div>
 
-        <div style={styles.section}>
-          <h4>📍 Distance</h4>
-          <p>{restaurant.distance} km away from your selected location.</p>
-        </div>
+            <div style={styles.section}>
+              <h4>⭐ Highlights</h4>
+              {/* Highlights dizisini liste olarak göster */}
+              <ul style={styles.highlightList}>
+                {explanation.highlights.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
 
-        <div style={styles.section}>
-          <h4>⚠️ Note</h4>
-          <p>
-            Since this is an AI-generated explanation, it should be considered
-            as a helpful summary rather than a final decision.
-          </p>
-        </div>
+            <div style={styles.section}>
+              <h4>⚠️ Note</h4>
+              <p>{explanation.warning}</p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
+// Stilleri yeni highlight listesi için güncelle
 const styles = {
   overlay: {
     position: "fixed",
@@ -89,6 +122,10 @@ const styles = {
     color: "#555",
     lineHeight: "1.6",
   },
+  highlightList: {
+    paddingLeft: '20px',
+    margin: '8px 0 0',
+  }
 };
 
 export default ExplanationPanel;

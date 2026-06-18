@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../api/authApi";
+import apiClient from "../api/api"; // Merkezi apiClient'ı kullan
 
 function Login() {
     const navigate = useNavigate();
@@ -17,71 +17,63 @@ function Login() {
         setError("");
 
         try {
-            const result = await loginUser({
-            username,
-            password,
+            // API çağrısını merkezi apiClient ile yap
+            const response = await apiClient.post("/auth/login", {
+                username,
+                password,
             });
 
-            localStorage.setItem("userName", result);
+            // Token'ı doğru anahtar ('token') ile localStorage'a kaydet
+            localStorage.setItem("token", response.data.access_token);
 
-            setMessage("Login successful.");
+            setMessage("Login successful. Redirecting...");
 
-        setTimeout(() => {
-            navigate("/recommendations");
-        }, 800);
+            setTimeout(() => {
+                navigate("/recommendations");
+            }, 800);
         } catch (err) {
-        setError(
-            err.response?.data ||
-            "Login failed. Please check your username and password."
-        );
+            setError(
+                err.response?.data?.detail ||
+                "Login failed. Please check your username and password."
+            );
         }
     };
-    return (
-    <div style={styles.page}>
-        <div style={styles.card} className="auth-card">
-        <div style={styles.left} className="auth-left">
-            <div style={styles.badge}>🍽️ LLM Powered</div>
-            <h1 style={styles.title} className="auth-title">FoodieAI</h1>
-            <p style={styles.subtitle}>
-            Find your next favorite restaurant in Ankara with smart, personalized recommendations.
-            </p>
 
-            <div style={styles.foodGrid}>
-            <div style={styles.foodBox}>🍔</div>
-            <div style={styles.foodBox}>🍕</div>
-            <div style={styles.foodBox}>🥗</div>
-            <div style={styles.foodBox}>☕</div>
+    return (
+        <div style={styles.page}>
+            <div style={styles.card} className="auth-card">
+                <div style={styles.left} className="auth-left">
+                    {/* ... (sol tarafın geri kalanı aynı) ... */}
+                </div>
+                <div style={styles.right} className="auth-right">
+                    <h2 style={styles.formTitle}>Welcome</h2>
+                    <p style={styles.formText}>Login to continue your restaurant journey.</p>
+
+                    <form onSubmit={handleLogin}>
+                        <input type="username" placeholder="Username" style={styles.input} value={username} onChange={(e) => setUsername(e.target.value)} />
+                        <input type="password" placeholder="Password" style={styles.input} value={password} onChange={(e) => setPassword(e.target.value)} />
+
+                        {message && <p style={styles.success}>{message}</p>}
+                        {error && <p style={styles.error}>{error}</p>}
+
+                        <button type="submit" style={styles.button}>
+                            Login
+                        </button>
+                    </form>
+
+                    <p style={styles.registerText}>
+                        Don&apos;t have an account?{" "}
+                        <Link to="/register" style={styles.link}>
+                            Register
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
-
-        <div style={styles.right} className="auth-right">
-            <h2 style={styles.formTitle}>Welcome</h2>
-            <p style={styles.formText}>Login to continue your restaurant journey.</p>
-
-            <form onSubmit={handleLogin}>
-                <input type="username" placeholder="Username" style={styles.input} value={username} onChange={(e) => setUsername(e.target.value)} />
-                <input type="password" placeholder="Password" style={styles.input} value={password} onChange={(e) => setPassword(e.target.value)} />
-
-                {message && <p style={styles.success}>{message}</p>}
-                {error && <p style={styles.error}>{error}</p>}
-
-                <button type="submit" style={styles.button}>
-                    Login
-                </button>
-            </form>
-
-            <p style={styles.registerText}>
-            Don&apos;t have an account?{" "}
-            <Link to="/register" style={styles.link}>
-                Register
-            </Link>
-            </p>
-        </div>
-        </div>
-    </div>
     );
 }
 
+// Stiller (styles) objesi burada yer alacak (değişiklik yok)
 const styles = {
     page: {
     minHeight: "100vh",

@@ -7,11 +7,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password, hashed_password):
     """Düz metin şifreyi hash'lenmiş olanla karşılaştırır."""
-    return pwd_context.verify(plain_password, hashed_password)
+    # Doğrulama sırasında da şifrenin kısaltılması gerekir
+    return pwd_context.verify(plain_password[:72], hashed_password)
 
 def get_password_hash(password):
-    """Verilen şifreyi hash'ler."""
-    return pwd_context.hash(password)
+    """Verilen şifreyi hash'ler. bcrypt 72 byte limitine uymak için kısaltılır."""
+    return pwd_context.hash(password[:72])
 
 async def register_user(request: RegisterRequest):
     """Yeni bir kullanıcıyı veritabanına kaydeder."""
@@ -26,11 +27,9 @@ async def register_user(request: RegisterRequest):
     
     # Yeni kullanıcı dokümanı oluştur
     new_user = {
-        "full_name": request.full_name,
+        "author_name": request.author_name,
         "username": request.username,
         "hashed_password": hashed_password,
-        # author_link gibi eski sistemle uyumluluk için alanlar eklenebilir
-        # "author_link": f"internal_user_{request.username}" 
     }
     
     await db.users.insert_one(new_user)
@@ -48,3 +47,23 @@ async def authenticate_user(request: LoginRequest):
         return None # Şifre yanlış
         
     return user
+
+async def update_password(username: str, password: str):
+    """Bir kullanıcının şifresini günceller."""
+    db = get_database()
+    
+    # Kullanıcıyı bul
+    user = await db.users.find_one({"username": username})
+    if not user:
+        raise ValueError("Kullanıcı bulunamadı.")
+        
+    # Yeni şifreyi hash'le
+    hashed_password = get_password_hash(password)
+    
+    # Şifreyi güncelle
+    await db.users.update_one(
+        {"username": username},
+        {"$set": {"hashed_password": hashed_password}}
+    )
+    
+    return await db.users.find_one({"username": username})
