@@ -1,93 +1,49 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import ExplanationPanel from "../components/ExplanationPanel";
 import RestaurantCard from "../components/RestaurantCard";
-import apiClient from "../api/api";
+import { useRecommendations } from "../context/RecommendationContext"; // Context'i kullanmak için hook'u import et
 
 const CUISINES = [
-  "All Cuisines",
   "Döner", "Tatlı", "Pide & Lahmacun", "Sokak Lezzetleri", "Kebap",
-  "Çiğ Köfte", "Burger", "Tavuk", "Fırın & Pastane", "Tost/Sandviç",
-  "Pizza", "Kahve & İçecek", "Ev Yemekleri", "Köfte", "Cafe",
-  "Dünya Mutfağı", "Meze", "Kahvaltı", "Börek", "Çorba", "Makarna",
-  "Mantı", "Balık & Deniz Ürünleri", "Salata & Sağlık", "Dondurma",
-  "Uzak Doğu", "Steak", "Tantuni"
+  "Çiğ Köfte", "Burger", "Tavuk", "Fırın & Pastane", "Tost/Sandviç", "Pizza",
+  "Kahve & İçecek", "Ev Yemekleri", "Köfte", "Cafe", "Dünya Mutfağı", "Meze",
+  "Kahvaltı", "Börek", "Çorba", "Makarna", "Mantı", "Balık & Deniz Ürünleri",
+  "Salata & Sağlık", "Dondurma", "Uzak Doğu", "Steak", "Tantuni"
 ];
 
 function Recommendations() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [restaurants, setRestaurants] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  // Filtre State'leri
-  const [cuisine, setCuisine] = useState("All Cuisines");
-  const [radius, setRadius] = useState(5.0);
-  const [minRating, setMinRating] = useState(4.0);
-  const [minReviews, setMinReviews] = useState(10);
-  const [topK, setTopK] = useState(10);
+  // Tüm state ve fonksiyonları context'ten alıyoruz
+  const {
+    restaurants,
+    isLoading,
+    error,
+    hasFetched,
+    handleGetRecommendations,
+    selectedCuisines, setSelectedCuisines,
+    radius, setRadius,
+    minRating, setMinRating,
+    minReviews, setMinReviews,
+    topK, setTopK
+  } = useRecommendations();
 
-  const getLocation = () => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Geolocation is not supported by your browser."));
-      } else {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            });
-          },
-          () => {
-            reject(new Error("Unable to retrieve your location. Please grant permission."));
-          }
-        );
-      }
-    });
-  };
-
-  const handleGetRecommendations = async () => {
-    setIsLoading(true);
-    setError(null);
-    setRestaurants([]);
-
-    try {
-      const location = await getLocation();
-
-      const payload = {
-        user_id: "100677076065329495898",
-        latitude: location.latitude,
-        longitude: location.longitude,
-        radius_km: parseFloat(radius),
-        min_rating: parseFloat(minRating),
-        top_k: parseInt(topK, 10),
-        // Sadece "All Cuisines" seçilmemişse kategoriyi gönder
-        categories: cuisine !== "All Cuisines" ? [cuisine] : undefined,
-      };
-
-      const response = await apiClient.post("/recommendations/", payload);
-      setRestaurants(response.data.recommendations);
-    } catch (err) {
-      let errorMessage = err.message || "An unexpected error occurred.";
-      if (err.response) {
-        if (err.response.status === 401) {
-          errorMessage = "Please log in to get recommendations.";
-        } else if (err.response.status === 422) {
-          errorMessage = "Invalid or missing data sent to the server.";
-          console.error("Validation Error:", err.response.data);
-        }
-      }
-      setError(errorMessage);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+  const handleCuisineChange = (cuisine) => {
+    if (selectedCuisines.includes(cuisine)) {
+      setSelectedCuisines(selectedCuisines.filter((c) => c !== cuisine));
+    } else {
+      setSelectedCuisines([...selectedCuisines, cuisine]);
     }
   };
 
-  useEffect(() => {
-    // Sayfa ilk yüklendiğinde otomatik istek göndermiyoruz.
-  }, []);
+  const handleToggleAllCuisines = () => {
+    if (selectedCuisines.length === CUISINES.length) {
+      setSelectedCuisines([]);
+    } else {
+      setSelectedCuisines([...CUISINES]);
+    }
+  };
 
   return (
     <div className="main-bg">
@@ -107,56 +63,38 @@ function Recommendations() {
         <section className="content-modern">
           <aside className="filter-modern">
             <h3>Filters</h3>
-
             <div className="filter-group">
-              <label>Cuisine</label>
-              <select value={cuisine} onChange={(e) => setCuisine(e.target.value)}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label style={{ margin: 0 }}>Cuisines</label>
+                <button onClick={handleToggleAllCuisines} style={{ background: 'none', border: 'none', color: '#ff6334', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', padding: 0 }}>
+                  {selectedCuisines.length === CUISINES.length ? "Deselect All" : "Select All"}
+                </button>
+              </div>
+              <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #eee', padding: '10px', borderRadius: '8px', background: '#fafafa' }}>
                 {CUISINES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <div key={c} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                    <input type="checkbox" id={`cuisine-${c}`} checked={selectedCuisines.includes(c)} onChange={() => handleCuisineChange(c)} style={{ marginRight: '10px', cursor: 'pointer' }} />
+                    <label htmlFor={`cuisine-${c}`} style={{ margin: 0, cursor: 'pointer', fontSize: '14px', color: '#555' }}>{c}</label>
+                  </div>
                 ))}
-              </select>
+              </div>
             </div>
-
             <div className="filter-group">
               <label>Radius: {radius} km</label>
-              <input
-                type="range"
-                min="0.5" max="20" step="0.5"
-                value={radius}
-                onChange={(e) => setRadius(e.target.value)}
-              />
+              <input type="range" min="0.5" max="20" step="0.5" value={radius} onChange={(e) => setRadius(e.target.value)} />
             </div>
-
             <div className="filter-group">
               <label>Minimum Rating: {minRating}</label>
-              <input
-                type="range"
-                min="1.0" max="5.0" step="0.1"
-                value={minRating}
-                onChange={(e) => setMinRating(e.target.value)}
-              />
+              <input type="range" min="1.0" max="5.0" step="0.1" value={minRating} onChange={(e) => setMinRating(e.target.value)} />
             </div>
-
             <div className="filter-group">
               <label>Minimum Reviews: {minReviews}</label>
-              <input
-                type="range"
-                min="0" max="500" step="10"
-                value={minReviews}
-                onChange={(e) => setMinReviews(e.target.value)}
-              />
+              <input type="range" min="0" max="500" step="10" value={minReviews} onChange={(e) => setMinReviews(e.target.value)} />
             </div>
-
             <div className="filter-group">
               <label>Top-K Results: {topK}</label>
-              <input
-                type="range"
-                min="3" max="20" step="1"
-                value={topK}
-                onChange={(e) => setTopK(e.target.value)}
-              />
+              <input type="range" min="3" max="20" step="1" value={topK} onChange={(e) => setTopK(e.target.value)} />
             </div>
-
             <button onClick={handleGetRecommendations} disabled={isLoading} style={{marginTop: '15px'}}>
               {isLoading ? "Getting Location..." : "Get Recommendations"}
             </button>
@@ -169,21 +107,33 @@ function Recommendations() {
             {isLoading && <p>Getting your location and recommendations...</p>}
             {error && <p className="error-message">{error}</p>}
 
-            <div className="cards-grid">
-              {!isLoading && !error && restaurants.length > 0 ? (
-                restaurants.map((restaurant) => (
+            {!isLoading && !error && restaurants.length > 0 && (
+              <div className="cards-grid">
+                {restaurants.map((restaurant) => (
                   <RestaurantCard
                     key={restaurant.id || restaurant.name}
                     restaurant={restaurant}
                     onExplain={setSelectedRestaurant}
                   />
-                ))
-              ) : (
-                !isLoading && !error && <p>Click "Get Recommendations" to allow location access and see your results.</p>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {/* hasFetched'i kullanarak ilk yüklemede mesajı göster */}
+            {!isLoading && !error && restaurants.length === 0 && !hasFetched && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', width: '100%' }}>
+                <p>Click "Get Recommendations" to allow location access and see your results.</p>
+              </div>
+            )}
+
+            {!isLoading && !error && restaurants.length === 0 && hasFetched && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', width: '100%' }}>
+                <p>No recommendations found for the selected filters.</p>
+              </div>
+            )}
           </section>
         </section>
+
         <ExplanationPanel
           restaurant={selectedRestaurant}
           onClose={() => setSelectedRestaurant(null)}

@@ -9,20 +9,12 @@ router = APIRouter()
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(request: RegisterRequest):
-    """
-    Yeni kullanıcı kaydı oluşturur.
-    - **author_name**: Yazarın tam adı.
-    - **username**: Benzersiz kullanıcı adı.
-    - **password**: En az 6 karakterli şifre.
-    """
+    # ... (register endpoint'i aynı)
     try:
         await auth_service.register_user(request)
         return {"message": "Kullanıcı başarıyla oluşturuldu."}
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @router.post("/login", response_model=Token)
 async def login_for_access_token(request: LoginRequest):
@@ -38,22 +30,21 @@ async def login_for_access_token(request: LoginRequest):
         )
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user["username"]}, expires_delta=access_token_expires
-    )
+    
+    # Token'ın içine 'author_name' alanını da ekle
+    token_data = {
+        "sub": user["username"],
+        "author_name": user.get("author_name", user["username"]) # author_name yoksa username kullan
+    }
+    access_token = create_access_token(data=token_data, expires_delta=access_token_expires)
     
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.put("/update-password", status_code=status.HTTP_200_OK)
 async def update_password(request: UpdatePasswordRequest):
-    """
-    Mevcut bir kullanıcının şifresini günceller.
-    """
+    # ... (update-password endpoint'i aynı)
     try:
         await auth_service.update_password(request.username, request.password)
         return {"message": "Şifre başarıyla güncellendi."}
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e),
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

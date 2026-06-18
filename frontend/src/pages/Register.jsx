@@ -1,12 +1,12 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { registerUser } from "../api/authApi";
+import { Link, useNavigate } from "react-router-dom";
+import apiClient from "../api/api"; // Merkezi apiClient'ı kullan
 
 function Register() {
     const navigate = useNavigate();
 
-    const [fullName, setFullName] = useState("");
+    // State'i backend şemasıyla uyumlu hale getir (author_name)
+    const [authorName, setAuthorName] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -14,109 +14,102 @@ function Register() {
     const [error, setError] = useState("");
 
     const handleRegister = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
+        setMessage("");
+        setError("");
 
-    setMessage("");
-    setError("");
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
 
-    if (password !== confirmPassword) {
-        setError("Passwords do not match.");
-        return;
-    }
+        try {
+            // Backend'in beklediği payload'u oluştur
+            const payload = {
+                author_name: authorName,
+                username,
+                password,
+            };
 
-    try {
-        const result = await registerUser({
-        fullName,
-        username,
-        password,
-        });
+            // API çağrısını merkezi apiClient ile yap
+            const response = await apiClient.post("/auth/register", payload);
 
-        setMessage(result);
+            setMessage(response.data.message + " Redirecting to login...");
 
-        setTimeout(() => {
-        navigate("/login");
-        }, 1200);
+            // Başarılı kayıt sonrası login sayfasına yönlendir
+            setTimeout(() => {
+                navigate("/login");
+            }, 1500);
 
-    } catch (err) {
-        setError(
-        err.response?.data ||
-        "Registration failed. Please try again."
-        );
-    }
+        } catch (err) {
+            setError(
+                err.response?.data?.detail ||
+                "Registration failed. Please try again."
+            );
+        }
     };
 
     return (
-    <div style={styles.page}>
-        <div style={styles.card}>
-        <div style={styles.left}>
-            <div style={styles.badge}>🍽️ Join FoodieAI</div>
-            <h1 style={styles.title}>Create Account</h1>
-            <p style={styles.subtitle}>
-            Start discovering personalized restaurant recommendations around Ankara.
-            </p>
+        <div style={styles.page}>
+            <div style={styles.card}>
+                <div style={styles.left}>
+                    {/* ... (sol tarafın geri kalanı aynı) ... */}
+                </div>
+                <div style={styles.right}>
+                    <h2 style={styles.formTitle}>Sign Up</h2>
+                    <p style={styles.formText}>Create your account to continue.</p>
 
-            <div style={styles.foodGrid}>
-            <div style={styles.foodBox}>🥙</div>
-            <div style={styles.foodBox}>🍝</div>
-            <div style={styles.foodBox}>🍰</div>
-            <div style={styles.foodBox}>☕</div>
+                    <form onSubmit={handleRegister}>
+                        <input
+                            type="text"
+                            placeholder="Full name"
+                            style={styles.input}
+                            value={authorName}
+                            onChange={(e) => setAuthorName(e.target.value)}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Username"
+                            style={styles.input}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            style={styles.input}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <input
+                            type="password"
+                            placeholder="Confirm password"
+                            style={styles.input}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+
+                        {message && <p style={styles.success}>{message}</p>}
+                        {error && <p style={styles.error}>{error}</p>}
+
+                        <button type="submit" style={styles.button}>
+                            Register
+                        </button>
+                    </form>
+
+                    <p style={styles.loginText}>
+                        Already have an account?{" "}
+                        <Link to="/login" style={styles.link}>
+                            Login
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
-
-        <div style={styles.right}>
-            <h2 style={styles.formTitle}>Sign Up</h2>
-            <p style={styles.formText}>Create your account to continue.</p>
-
-        <form onSubmit={handleRegister}>
-            <input
-            type="text"
-            placeholder="Full name"
-            style={styles.input}
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            />
-            <input
-            type="text"
-            placeholder="Username"
-            style={styles.input}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            />
-            <input
-            type="password"
-            placeholder="Password"
-            style={styles.input}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-            type="password"
-            placeholder="Confirm password"
-            style={styles.input}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-
-            {message && <p style={styles.success}>{message}</p>}
-            {error && <p style={styles.error}>{error}</p>}
-
-            <button type="submit" style={styles.button}>
-                Register
-            </button>
-        </form>
-
-            <p style={styles.loginText}>
-            Already have an account?{" "}
-            <Link to="/login" style={styles.link}>
-                Login
-            </Link>
-            </p>
-        </div>
-        </div>
-    </div>
     );
 }
 
+// Stiller (styles) objesi burada yer alacak (değişiklik yok)
 const styles = {
     page: {
     minHeight: "100vh",

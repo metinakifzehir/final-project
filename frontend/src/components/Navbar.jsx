@@ -1,14 +1,29 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import { UtensilsCrossed } from "lucide-react";
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
-  const userName = localStorage.getItem("userName") || "";
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUser(decodedToken);
+      } catch (error) {
+        console.error("Invalid token:", error);
+        localStorage.removeItem("token");
+      }
+    }
+  }, [location]);
 
   const handleLogout = () => {
-    localStorage.removeItem("userName");
+    localStorage.removeItem("token");
+    setUser(null);
     navigate("/login");
   };
 
@@ -22,29 +37,38 @@ function Navbar() {
       <div className="nav-links">
         <Link
           to="/recommendations"
-          className={`nav-link ${
-            location.pathname === "/recommendations" ? "active" : ""
-          }`}
+          className={`nav-link ${location.pathname === "/recommendations" ? "active" : ""}`}
         >
           Recommendations
         </Link>
-
         <Link
           to="/search"
-          className={`nav-link ${
-            location.pathname === "/search" ? "active" : ""
-          }`}
+          className={`nav-link ${location.pathname === "/search" ? "active" : ""}`}
         >
           Search
         </Link>
       </div>
 
       <div className="nav-user">
-        <span>{userName}</span>
-
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        {user ? (
+          <>
+            {/* Link stili, normal metin gibi görünmesi için güncellendi */}
+            <Link
+              to="/profile"
+              className="user-name-link"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <span className="user-name">{user.author_name}</span>
+            </Link>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link to="/login" className="login-btn">
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );

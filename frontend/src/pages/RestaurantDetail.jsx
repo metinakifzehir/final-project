@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import apiClient from "../api/api";
 
 function RestaurantDetail() {
-  const { id } = useParams(); // URL'den restoran ID'sini al
+  const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,14 +25,14 @@ function RestaurantDetail() {
     };
 
     fetchDetails();
-  }, [id]); // 'id' değiştiğinde effect'i yeniden çalıştır
+  }, [id]);
 
+  // Google Maps linkini yeni formata göre güncelliyoruz
   const openGoogleMaps = () => {
-    if (!restaurant) return;
+    if (!restaurant || !restaurant.id) return;
+    const placeId = restaurant.id;
     window.open(
-      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        restaurant.name + " " + restaurant.address
-      )}`,
+      `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${placeId}`,
       "_blank"
     );
   };
@@ -67,7 +67,7 @@ function RestaurantDetail() {
           <div className="hero-badge">{restaurant.category}</div>
           <h1>{restaurant.name}</h1>
           <p>
-            📍 {restaurant.address} · ⭐ {restaurant.rating}
+            📍 {restaurant.address} · ⭐ {restaurant.rating} ({restaurant.rating_count} reviews)
           </p>
           <div className="detail-actions">
             <span className={restaurant.is_open ? "open-badge" : "closed-badge"}>

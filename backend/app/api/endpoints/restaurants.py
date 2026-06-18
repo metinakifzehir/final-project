@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query, HTTPException
-from typing import List
+from typing import List, Optional
 from app.database import get_database
 from app.schemas.recommendation import RestaurantResponse
 from app.schemas.restaurant import RestaurantDetailResponse, ReviewResponse
@@ -12,9 +12,16 @@ async def search_restaurants(
     query: str = Query(..., min_length=2, description="Aranacak restoran adı parçası"),
     latitude: float = Query(..., description="Kullanıcının enlem konumu"),
     longitude: float = Query(..., description="Kullanıcının boylam konumu"),
-    radius_km: float = Query(100.0, description="Arama yapılacak maksimum yarıçap (km)")
+    radius_km: float = Query(10.0, description="Arama yapılacak maksimum yarıçap (km)"),
+    categories: Optional[List[str]] = Query(None, description="Filtrelenecek kategoriler"),
+    min_rating: Optional[float] = Query(None, ge=1.0, le=5.0, description="Minimum Google puanı"),
+    min_reviews: Optional[int] = Query(None, ge=0, description="Minimum yorum sayısı")
 ):
+    """
+    Veritabanında restoran adına ve diğer filtrelere göre arama yapar.
+    """
     db = get_database()
+    
     geo_query_point = {"type": "Point", "coordinates": [longitude, latitude]}
     query_filter = {
         "google_name": {"$regex": query, "$options": "i"},
@@ -25,6 +32,15 @@ async def search_restaurants(
             }
         }
     }
+
+    # Ek filtreleri sorguya ekle
+    if categories:
+        query_filter["category"] = {"$in": categories}
+    if min_rating is not None:
+        query_filter["rating"] = {"$gte": min_rating}
+    if min_reviews is not None:
+        query_filter["rating_count"] = {"$gte": min_reviews}
+
     restaurants_cursor = db.restaurants.find(query_filter).limit(20)
     restaurants = await restaurants_cursor.to_list(length=20)
     

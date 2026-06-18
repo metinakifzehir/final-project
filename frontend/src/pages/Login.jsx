@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import apiClient from "../api/api"; // Merkezi apiClient'ı kullan
+import apiClient from "../api/api";
 
 function Login() {
     const navigate = useNavigate();
@@ -12,22 +12,16 @@ function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
         setMessage("");
         setError("");
 
         try {
-            // API çağrısını merkezi apiClient ile yap
             const response = await apiClient.post("/auth/login", {
                 username,
                 password,
             });
-
-            // Token'ı doğru anahtar ('token') ile localStorage'a kaydet
             localStorage.setItem("token", response.data.access_token);
-
             setMessage("Login successful. Redirecting...");
-
             setTimeout(() => {
                 navigate("/recommendations");
             }, 800);
@@ -42,11 +36,24 @@ function Login() {
     return (
         <div style={styles.page}>
             <div style={styles.card} className="auth-card">
+                {/* Sol Taraf - Register sayfasından alınan görsel içerik */}
                 <div style={styles.left} className="auth-left">
-                    {/* ... (sol tarafın geri kalanı aynı) ... */}
+                    <div style={styles.badge}>🍽️ LLM Powered</div>
+                    <h1 style={styles.title}>FoodieAI</h1>
+                    <p style={styles.subtitle}>
+                        Find your next favorite restaurant in Ankara with smart, personalized recommendations.
+                    </p>
+                    <div style={styles.foodGrid}>
+                        <div style={styles.foodBox}>🍔</div>
+                        <div style={styles.foodBox}>🍕</div>
+                        <div style={styles.foodBox}>🥗</div>
+                        <div style={styles.foodBox}>☕</div>
+                    </div>
                 </div>
+
+                {/* Sağ Taraf - Login Formu */}
                 <div style={styles.right} className="auth-right">
-                    <h2 style={styles.formTitle}>Welcome</h2>
+                    <h2 style={styles.formTitle}>Welcome Back</h2>
                     <p style={styles.formText}>Login to continue your restaurant journey.</p>
 
                     <form onSubmit={handleLogin}>
@@ -73,7 +80,7 @@ function Login() {
     );
 }
 
-// Stiller (styles) objesi burada yer alacak (değişiklik yok)
+// Stiller (değişiklik yok)
 const styles = {
     page: {
     minHeight: "100vh",
@@ -186,7 +193,6 @@ const styles = {
     fontSize: "14px",
     marginBottom: "12px",
     },
-
     error: {
     background: "#FDECEC",
     color: "#D93025",
