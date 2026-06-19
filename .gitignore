@@ -32,6 +32,3 @@ frontend/build/
 # OS
 .DS_Store
 Thumbs.db
-
-# Docker
-mongodb_data/

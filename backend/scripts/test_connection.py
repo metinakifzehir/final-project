@@ -43,7 +43,7 @@ async def main() -> int:
     except Exception as exc:
         print(f"Baglanti hatasi: {exc}", file=sys.stderr)
         print(
-            "MongoDB calisiyor mu? Once proje kokunde: docker compose up -d",
+            "MONGODB_URI ve MONGODB_DB_NAME degerlerini backend/.env icinde kontrol edin.",
             file=sys.stderr,
         )
         return 1
